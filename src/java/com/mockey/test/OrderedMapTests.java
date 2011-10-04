@@ -1,23 +1,25 @@
 package com.mockey.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
 import com.mockey.OrderedMap;
 import com.mockey.model.PersistableItem;
 
-import static org.junit.Assert.*;
-
 public class OrderedMapTests {
 	
-	private class LabeledItem implements PersistableItem {
+	private class BasicPersistableItem implements PersistableItem {
 		private Long id;
-		private String label;
 		
-		public LabeledItem(Long id, String label) {
+		public BasicPersistableItem(Long id) {
 			this.id = id;
-			this.label = label;
 		}
 		
 		public Long getId() {
@@ -27,36 +29,24 @@ public class OrderedMapTests {
 		public void setId(Long id) {
 			this.id = id;
 		}
-		
-		public String getLabel() {
-			return this.label;
-		}
 	}
 	
-	private OrderedMap<LabeledItem> items;
+	private OrderedMap<BasicPersistableItem> items;
 	
 	@Before
 	public void beforeTest() {
-		this.items = new OrderedMap<LabeledItem>();
+		this.items = new OrderedMap<BasicPersistableItem>();
 	}
 	
-	private void saveItems(LabeledItem...items) {
-		for (LabeledItem item : items) {
-			this.items.save(item);
+	private void saveItems(int numberOfItems) {
+		for (int i = 1; i <= numberOfItems; ++i) {
+			this.items.save(new BasicPersistableItem((long)i));
 		}
-	}
-	
-	private void saveThreeItems() {
-		saveItems(
-			new LabeledItem(1L, "foo"),
-			new LabeledItem(2L, "bar"),
-			new LabeledItem(3L, "baz")
-		);
 	}
 	
 	private List<Long> getOrderedIds() {
 		List<Long> ids = new ArrayList<Long>();
-		for (LabeledItem item : this.items.getOrderedList()) {
+		for (BasicPersistableItem item : this.items.getOrderedList()) {
 			ids.add(item.getId());
 		}
 		return ids;
@@ -68,7 +58,7 @@ public class OrderedMapTests {
 	
 	@Test
 	public void returnsItemWhenSaved() {
-		LabeledItem item = new LabeledItem(0L, "foo");
+		BasicPersistableItem item = new BasicPersistableItem(0L);
 		assertEquals(item, this.items.save(item));
 	}
 	
@@ -79,34 +69,34 @@ public class OrderedMapTests {
 	
 	@Test
 	public void populatesItemWithIdWhenMissing() {
-		LabeledItem item = new LabeledItem(null, "foo");
+		BasicPersistableItem item = new BasicPersistableItem(null);
 		assertNotNull(this.items.save(item).getId());
 	}
 	
 	@Test
 	public void limitsInternalStoreToSpecifiedMaxSize() {
 		this.items.setMaxSize(2);
-		saveThreeItems();
+		saveItems(3);
 		assertEquals(2, this.items.size());
 	}
 	
 	@Test
 	public void assignsItemNewMaxIdWhenIdMissing() {
-		saveThreeItems();
-		LabeledItem item = new LabeledItem(null, "blah");
+		saveItems(3);
+		BasicPersistableItem item = new BasicPersistableItem(null);
 		assertEquals(4L, this.items.save(item).getId());
 	}
 	
 	@Test
 	public void dropsItemWithLowestIdWhenExceedingMaxSize() {
 		this.items.setMaxSize(2);
-		saveThreeItems();
+		saveItems(3);
 		verifyIds(2L, 3L);
 	}
 	
 	@Test
 	public void providesListOfItemsOrderedById() {
-		saveThreeItems();
+		saveItems(3);
 		verifyIds(1L, 2L, 3L);
 	}
 }
