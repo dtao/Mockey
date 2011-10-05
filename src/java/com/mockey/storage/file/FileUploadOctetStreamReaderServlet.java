@@ -39,8 +39,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 
-
-
 public class FileUploadOctetStreamReaderServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8429482476914060900L;

@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -177,7 +178,7 @@ public class MockeyXmlFileManager {
 			try {
 				String mockServiceDefinition = getFileContentAsString(new File(serviceRef.getFileName()));
 
-				List<Service> tmpList = msfr.readServiceDefinition(mockServiceDefinition);
+				Collection<Service> tmpList = msfr.readServiceDefinition(mockServiceDefinition);
 				for (Service tmpService : tmpList) {
 					serviceListFromRefs.add(tmpService);
 				}
@@ -215,7 +216,7 @@ public class MockeyXmlFileManager {
 		return mergeResults;
 	}
 
-	private ServiceMergeResults addServicesToStore(ServiceMergeResults mergeResults, List<Service> serviceList) {
+	private ServiceMergeResults addServicesToStore(ServiceMergeResults mergeResults, Collection<Service> serviceList) {
 		// When loading a definition file, by default, we should
 		// compare the uploaded Service list mock URL to what's currently
 		// in memory.
@@ -230,7 +231,7 @@ public class MockeyXmlFileManager {
 		// If there is no matching service URL, then create a new
 		// service and associated scenarios.
 		for (Service uploadedServiceBean : serviceList) {
-			List<Service> serviceBeansInMemory = store.getServices();
+			Collection<Service> serviceBeansInMemory = store.getServices();
 			Iterator<Service> iter3 = serviceBeansInMemory.iterator();
 			boolean existingServiceWithMatchingMockUrl = false;
 			Service inMemoryServiceBean = null;

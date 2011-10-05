@@ -1,6 +1,6 @@
 package com.mockey.storage;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.mockey.OrderedMap;
 import com.mockey.model.ApiDocService;
@@ -26,7 +26,7 @@ public class IApiStorageInMemory implements IApiStorage {
 	}
 
 	@Override
-	public List<ApiDocService> getApiDocServices() {
+	public Collection<ApiDocService> getApiDocServices() {
 		return this.apiStore.getOrderedList();
 
 	}

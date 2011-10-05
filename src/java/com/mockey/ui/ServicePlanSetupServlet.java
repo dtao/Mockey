@@ -30,6 +30,7 @@ package com.mockey.ui;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -211,7 +212,7 @@ public class ServicePlanSetupServlet extends HttpServlet implements ServicePlanC
 			// log.debug("Service Plan setup/delete");
 			ServicePlan servicePlan = null;
 			Long servicePlanId = null;
-			List<Service> allServices = store.getServices();
+			Collection<Service> allServices = store.getServices();
 			// *********************
 			// BEST EFFORT HERE.
 			// We try to find the service by ID.

@@ -28,7 +28,6 @@
 package com.mockey.storage;
 
 import java.util.Collection;
-import java.util.List;
 
 import com.mockey.model.FulfilledClientRequest;
 import com.mockey.model.ProxyServerModel;
@@ -52,7 +51,7 @@ public interface IMockeyStorage {
 	
 	public void deleteEverything();
 
-	public List<TwistInfo> getTwistInfoList();
+	public Collection<TwistInfo> getTwistInfoList();
 
 	public TwistInfo getTwistInfoById(Long id);
 
@@ -66,9 +65,9 @@ public interface IMockeyStorage {
 
 	public Service getServiceByUrl(String urlPath);
 
-	public List<Long> getServiceIds();
+	public Collection<Long> getServiceIds();
 
-	public List<Service> getServices();
+	public Collection<Service> getServices();
 
 	public Service saveOrUpdateService(Service service);
 
@@ -76,13 +75,13 @@ public interface IMockeyStorage {
 
 	public ServiceRef saveOrUpdateServiceRef(ServiceRef serviceRef);
 
-	public List<ServiceRef> getServiceRefs();
+	public Collection<ServiceRef> getServiceRefs();
 
 	public ServicePlan getServicePlanById(Long servicePlanId);
 
 	public ServicePlan getServicePlanByName(String servicePlanName);
 
-	public List<ServicePlan> getServicePlans();
+	public Collection<ServicePlan> getServicePlans();
 
 	public ServicePlan saveOrUpdateServicePlan(ServicePlan servicePlan);
 
@@ -106,21 +105,21 @@ public interface IMockeyStorage {
 
 	public void setProxy(ProxyServerModel proxy);
 
-	public List<String> uniqueClientIPs();
+	public Collection<String> uniqueClientIPs();
 
-	public List<String> uniqueClientIPsForService(Long serviceId);
+	public Collection<String> uniqueClientIPsForService(Long serviceId);
 
-	public List<FulfilledClientRequest> getFulfilledClientRequests();
+	public Collection<FulfilledClientRequest> getFulfilledClientRequests();
 
 	public FulfilledClientRequest getFulfilledClientRequestsById(Long fulfilledClientRequestId);
 
-	public List<FulfilledClientRequest> getFulfilledClientRequestsFromIP(String ip);
+	public Collection<FulfilledClientRequest> getFulfilledClientRequestsFromIP(String ip);
 
-	public List<FulfilledClientRequest> getFulfilledClientRequestsForService(Long serviceId);
+	public Collection<FulfilledClientRequest> getFulfilledClientRequestsForService(Long serviceId);
 
-	public List<FulfilledClientRequest> getFulfilledClientRequestsFromIPForService(String ip, Long serviceId);
+	public Collection<FulfilledClientRequest> getFulfilledClientRequestsFromIPForService(String ip, Long serviceId);
 
-	public List<FulfilledClientRequest> getFulfilledClientRequest(Collection<String> filterArguments);
+	public Collection<FulfilledClientRequest> getFulfilledClientRequest(Collection<String> filterArguments);
 
 	public void saveOrUpdateFulfilledClientRequest(FulfilledClientRequest requestResponseX);
 

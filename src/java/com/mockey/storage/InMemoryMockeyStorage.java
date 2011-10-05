@@ -46,8 +46,8 @@ import com.mockey.model.ServicePlan;
 import com.mockey.model.ServiceRef;
 import com.mockey.model.TwistInfo;
 import com.mockey.model.Url;
-import com.mockey.storage.xml.MockeyXmlFileManager;
 import com.mockey.storage.xml.MockeyXmlFactory;
+import com.mockey.storage.xml.MockeyXmlFileManager;
 
 /**
  * In memory implementation to the storage of mock services and scenarios.
@@ -212,7 +212,7 @@ public class InMemoryMockeyStorage implements IMockeyStorage {
 		return ids;
 	}
 
-	public List<Service> getServices() {
+	public Collection<Service> getServices() {
 		return this.mockServiceStore.getOrderedList();
 	}
 
@@ -223,7 +223,7 @@ public class InMemoryMockeyStorage implements IMockeyStorage {
 	/**
 	 * @return list of FulfilledClientRequest objects
 	 */
-	public List<FulfilledClientRequest> getFulfilledClientRequests() {
+	public Collection<FulfilledClientRequest> getFulfilledClientRequests() {
 		return this.historyStore.getOrderedList();
 	}
 
@@ -275,7 +275,7 @@ public class InMemoryMockeyStorage implements IMockeyStorage {
 		return sp;
 	}
 
-	public List<ServicePlan> getServicePlans() {
+	public Collection<ServicePlan> getServicePlans() {
 		return this.servicePlanStore.getOrderedList();
 	}
 
@@ -408,9 +408,9 @@ public class InMemoryMockeyStorage implements IMockeyStorage {
 	 * Filters list with AND not OR. If string starts with "!", we consider it
 	 * NOT.
 	 */
-	public List<FulfilledClientRequest> getFulfilledClientRequest(Collection<String> filterArguments) {
+	public Collection<FulfilledClientRequest> getFulfilledClientRequest(Collection<String> filterArguments) {
 
-		List<FulfilledClientRequest> rv = new ArrayList<FulfilledClientRequest>();
+		Collection<FulfilledClientRequest> rv = new ArrayList<FulfilledClientRequest>();
 		if (filterArguments.size() == 0) {
 			rv = this.getFulfilledClientRequests();
 		} else {
@@ -516,7 +516,7 @@ public class InMemoryMockeyStorage implements IMockeyStorage {
 
 	}
 
-	public List<TwistInfo> getTwistInfoList() {
+	public Collection<TwistInfo> getTwistInfoList() {
 		return this.twistInfoStore.getOrderedList();
 	}
 
@@ -567,7 +567,7 @@ public class InMemoryMockeyStorage implements IMockeyStorage {
 		return this.univeralErrorServiceId;
 	}
 
-	public List<ServiceRef> getServiceRefs() {
+	public Collection<ServiceRef> getServiceRefs() {
 		return this.serviceRefStore.getOrderedList();
 	}
 

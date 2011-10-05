@@ -1,5 +1,5 @@
 /*
- * This file is part of Mockey, a tool for testing application 
+¿ * This file is part of Mockey, a tool for testing application 
  * interactions over HTTP, with a focus on testing web services, 
  * specifically web applications that consume XML, JSON, and HTML.
  *  
@@ -28,6 +28,7 @@
 package com.mockey.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -100,6 +101,15 @@ public class Util {
 		}
 
 	}
+	
+	public static <T> List<T> orderBy(Collection<T> collection, Comparator<T> comparator) {
+		List<T> ordered = new ArrayList<T>();
+		ordered.addAll(collection);
+		
+		Collections.sort(ordered, comparator);
+		
+		return ordered;
+	}
 
 	/**
 	 * Returns the services list ordered alphabetically.
@@ -107,7 +117,7 @@ public class Util {
 	 * @param services
 	 * @return
 	 */
-	public static List<Service> orderAlphabeticallyByServiceName(List<Service> services) {
+	public static List<Service> orderAlphabeticallyByServiceName(Collection<Service> services) {
 
 		// Custom comparator
 		class ServiceNameComparator implements Comparator<Service> {
@@ -118,10 +128,8 @@ public class Util {
 			}
 
 		}
-		// Sort me.
-		Collections.sort(services, new ServiceNameComparator());
-
-		return services;
+		
+		return orderBy(services, new ServiceNameComparator());
 	}
 
 	/**
@@ -130,7 +138,7 @@ public class Util {
 	 * @param services
 	 * @return
 	 */
-	public static List<ServicePlan> orderAlphabeticallyByServicePlanName(List<ServicePlan> servicePlans) {
+	public static List<ServicePlan> orderAlphabeticallyByServicePlanName(Collection<ServicePlan> servicePlans) {
 
 		// Custom comparator
 		class ServicePlanNameComparator implements Comparator<ServicePlan> {
@@ -141,10 +149,8 @@ public class Util {
 			}
 
 		}
-		// Sort me.
-		Collections.sort(servicePlans, new ServicePlanNameComparator());
-
-		return servicePlans;
+		
+		return orderBy(servicePlans, new ServicePlanNameComparator());
 	}
 	
 	/**
@@ -153,7 +159,7 @@ public class Util {
 	 * @param services
 	 * @return
 	 */
-	public static List<ApiDocService> orderAlphabeticallyByApiName(List<ApiDocService> apiDocServices) {
+	public static List<ApiDocService> orderAlphabeticallyByApiName(Collection<ApiDocService> apiDocServices) {
 
 		// Custom comparator
 		class ApiDocServiceComparator implements Comparator<ApiDocService> {
@@ -164,10 +170,8 @@ public class Util {
 			}
 
 		}
-		// Sort me.
-		Collections.sort(apiDocServices, new ApiDocServiceComparator());
-
-		return apiDocServices;
+		
+		return orderBy(apiDocServices, new ApiDocServiceComparator());
 	}
 
 	/**
@@ -176,19 +180,15 @@ public class Util {
 	 * @param services
 	 * @return
 	 */
-	public static List<Scenario> orderAlphabeticallyByScenarioName(List<Scenario> scenarios) {
-
+	public static List<Scenario> orderAlphabeticallyByScenarioName(Collection<Scenario> scenarios) {
 		// Custom comparator
 		class ScenarioNameComparator implements Comparator<Scenario> {
-
 			public int compare(Scenario s1, Scenario s2) {
 				return s1.getScenarioName().compareToIgnoreCase(s2.getScenarioName());
 			}
 		}
-		// Sort me.
-		Collections.sort(scenarios, new ScenarioNameComparator());
-
-		return scenarios;
+		
+		return orderBy(scenarios, new ScenarioNameComparator());
 	}
 
 	/**
@@ -215,6 +215,14 @@ public class Util {
 		}
 
 		return result;
+	}
+	
+	public static <T> T getFirstItem(Iterable<T> sequence) {
+		for (T element : sequence) {
+			return element;
+		}
+		
+		return null;
 	}
 
 }

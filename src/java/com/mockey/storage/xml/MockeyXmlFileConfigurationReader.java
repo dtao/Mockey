@@ -29,7 +29,7 @@ package com.mockey.storage.xml;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.List;
+import java.util.Collection;
 
 import org.xml.sax.InputSource;
 
@@ -64,7 +64,7 @@ public class MockeyXmlFileConfigurationReader {
 	 * @param mockServicesDefinition
 	 * @return
 	 */
-	public List<Service> readServiceDefinition(String mockServiceDefinition) throws org.xml.sax.SAXParseException,
+	public Collection<Service> readServiceDefinition(String mockServiceDefinition) throws org.xml.sax.SAXParseException,
 			java.io.IOException, org.xml.sax.SAXException {
 
 		BufferedReader br = new BufferedReader(new StringReader(mockServiceDefinition));
@@ -151,7 +151,7 @@ public class MockeyXmlFileConfigurationReader {
 
 			String fragXMLRequest = new String(baos.toByteArray());
 			
-			List<Service> list = fileReader.readServiceDefinition(fragXMLRequest);
+			Collection<Service> list = fileReader.readServiceDefinition(fragXMLRequest);
 			for(Service y : list){
 				System.out.println(getServiceString(y));
 			}

@@ -29,6 +29,7 @@ package com.mockey.model;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -270,7 +271,7 @@ public class Service implements PersistableItem, ExecutableService {
 	// auto-set the defaultID to the 'first' scenario
 	private void validateDefaultScenarioId() {
 		boolean valid = false;
-		List<Scenario> orderedList = this.scenarios.getOrderedList();
+		Collection<Scenario> orderedList = this.scenarios.getOrderedList();
 		
 		for(Scenario s: orderedList){
 	
@@ -280,8 +281,8 @@ public class Service implements PersistableItem, ExecutableService {
 			}
 		}
 		if(!valid){
-			if(this.scenarios.getOrderedList().size() > 0){
-				this.setDefaultScenarioId(orderedList.get(0).getId());
+			if(orderedList.size() > 0){
+				this.setDefaultScenarioId(Util.getFirstItem(orderedList).getId());
 			}else {
 				// Reset
 				this.setDefaultScenarioId(null);

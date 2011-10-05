@@ -27,7 +27,7 @@
  */
 package com.mockey.storage;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.mockey.model.ApiDocService;
 
@@ -40,7 +40,7 @@ public interface IApiStorage {
 
 	public ApiDocService getApiDocServiceById(Long serviceId);
 	public ApiDocService getApiDocServiceByName(String name);
-	public List<ApiDocService> getApiDocServices();
+	public Collection<ApiDocService> getApiDocServices();
 	public ApiDocService saveOrUpdateService(ApiDocService apiDocService);
 	
 }

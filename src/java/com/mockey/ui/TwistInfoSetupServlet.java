@@ -30,7 +30,7 @@ package com.mockey.ui;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -61,7 +61,7 @@ public class TwistInfoSetupServlet extends HttpServlet implements TwistInfoConfi
 	 */
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		List<TwistInfo> twistInfoList = store.getTwistInfoList();
+		Collection<TwistInfo> twistInfoList = store.getTwistInfoList();
 		String responseType = req.getParameter("response-type");
 		// If type is JSON, then respond with JSON
 		// Otherwise, direct to JSP
@@ -188,7 +188,7 @@ public class TwistInfoSetupServlet extends HttpServlet implements TwistInfoConfi
 			out.close();
 			return;
 		} else {
-			List<TwistInfo> twistInfoList = store.getTwistInfoList();
+			Collection<TwistInfo> twistInfoList = store.getTwistInfoList();
 			req.setAttribute("twistInfoList", twistInfoList);
 			req.setAttribute("twistInfoIdEnabled", store.getUniversalTwistInfoId());
 

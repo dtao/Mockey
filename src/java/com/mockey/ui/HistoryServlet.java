@@ -28,7 +28,7 @@
 package com.mockey.ui;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -115,7 +115,7 @@ public class HistoryServlet extends HttpServlet {
 
             historyFilter.addTokens(filterTokens);
         }
-        List<FulfilledClientRequest> fulfilledRequests = store.getFulfilledClientRequest(historyFilter.getTokens());
+        Collection<FulfilledClientRequest> fulfilledRequests = store.getFulfilledClientRequest(historyFilter.getTokens());
         req.setAttribute("requests", fulfilledRequests);
         req.getSession().setAttribute(HISTORY_FILTER, historyFilter);
         RequestDispatcher dispatch = req.getRequestDispatcher("/history.jsp");

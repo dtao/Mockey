@@ -30,6 +30,7 @@ package com.mockey.ui;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -64,7 +65,7 @@ public class ServiceSetupServlet extends HttpServlet {
 
 		if (req.getParameter("all") != null
 				&& req.getParameter("responseType") != null) {
-			List<Service> services = store.getServices();
+			Collection<Service> services = store.getServices();
 			// #1. Get a handle of the original read-only-mode (transient?)
 			Boolean origReadOnlyMode = store.getReadOnlyMode();
 			try {

@@ -27,7 +27,7 @@
  */
 package com.mockey.storage.xml;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.commons.digester.Digester;
 import org.xml.sax.InputSource;
@@ -169,12 +169,12 @@ public class MockeyXmlFileConfigurationParser {
 	 * @throws java.io.IOException
 	 * @throws org.xml.sax.SAXException
 	 */
-	public List<Service> getMockService(InputSource inputSource) throws org.xml.sax.SAXParseException,
+	public Collection<Service> getMockService(InputSource inputSource) throws org.xml.sax.SAXParseException,
 			java.io.IOException, org.xml.sax.SAXException {
 
 		InMemoryMockeyStorage c = (InMemoryMockeyStorage) MockeyXmlFileConfigurationParser.fullSetDigester
 				.parse(inputSource);
-		List<Service> list = c.getServices();
+		Collection<Service> list = c.getServices();
 		return list;
 
 	}

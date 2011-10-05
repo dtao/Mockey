@@ -27,10 +27,9 @@
  */
 package com.mockey;
 
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.mockey.model.PersistableItem;
 
@@ -50,7 +49,7 @@ import com.mockey.model.PersistableItem;
  * @author chad.lafontaine
  * 
  */
-public class OrderedMap<T extends PersistableItem> extends ConcurrentHashMap<Long, T> implements Map<Long, T> {
+public class OrderedMap<T extends PersistableItem> extends ConcurrentSkipListMap<Long, T> implements Map<Long, T> {
 
     private static final long serialVersionUID = -1654150132938363942L;
     private Integer maxSize = null;
@@ -68,23 +67,21 @@ public class OrderedMap<T extends PersistableItem> extends ConcurrentHashMap<Lon
     public PersistableItem save(T item) {
 
         if (item != null) {
-            if (item.getId() != null) {
-                this.put(item.getId(), item);
-            } else {
+            if (item.getId() == null) {
                 Long nextNumber = this.getNextValue();
                 item.setId(nextNumber);
-                this.put(nextNumber, item);
             }
+            
+            this.put(item.getId(), item);
         }
 
         if (this.maxSize != null && this.maxSize > 0) {
-
             while (this.size() > this.maxSize) {
                 Long removeMe = getSmallestValue();
                 this.remove(removeMe);
             }
-
         }
+        
         return item;
     }
 
@@ -96,50 +93,15 @@ public class OrderedMap<T extends PersistableItem> extends ConcurrentHashMap<Lon
     }
 
     private Long getSmallestValue() {
-        Long smallestValue = null;
-        for (Long key : this.keySet()) {
-            if (smallestValue == null) {
-                smallestValue = key;
-            } else if (key < smallestValue) {
-                smallestValue = key;
-            }
-
-        }
-        return smallestValue;
+        return this.firstKey();
     }
 
     private Long getNextValue() {
-        Long nextValue = new Long(0);
-        for (Long key : this.keySet()) {
-            if (key > nextValue) {
-                nextValue = key;
-            }
-        }
-        nextValue = new Long(nextValue.longValue() + 1);
-        return nextValue;
+        return this.isEmpty() ? 1L : new Long(this.lastKey() + 1L);
     }
 
-    public List<T> getOrderedList() {
-
-        List<Long> orderedListOfKeys = new ArrayList<Long>();
-        for (Long key : this.keySet()) {
-            int index = 0;
-            for (Long current : orderedListOfKeys) {
-                if (current > key) {
-                    break;
-                }
-                index++;
-            }
-            orderedListOfKeys.add(index, key);
-        }
-
-        // Ordered key list.
-        List<T> orderedListOfValues = new ArrayList<T>();
-        for (Long key : orderedListOfKeys) {
-            orderedListOfValues.add(this.get(key));
-        }
-
-        return orderedListOfValues;
+	public Collection<T> getOrderedList() {
+    	return this.values();
     }
 
     /**

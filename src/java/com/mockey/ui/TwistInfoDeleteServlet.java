@@ -29,7 +29,7 @@ package com.mockey.ui;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
+import java.util.Collection;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -98,7 +98,7 @@ public class TwistInfoDeleteServlet extends HttpServlet implements TwistInfoConf
 			// ***********************
 
 		} else {
-			List<TwistInfo> twistInfoList = store.getTwistInfoList();
+			Collection<TwistInfo> twistInfoList = store.getTwistInfoList();
 			Util.saveSuccessMessage("Deleted", req);
 			req.setAttribute("twistInfoList", twistInfoList);
 			req.setAttribute("twistInfoIdEnabled", store.getUniversalTwistInfoId());

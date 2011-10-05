@@ -27,7 +27,7 @@ package com.mockey.ui;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -164,7 +164,7 @@ public class ServiceDefinitionInfoServlet extends HttpServlet {
 		JSONObject jsonResponseObject = new JSONObject();
 		try {
 
-			List<Service> servicesList = null;
+			Collection<Service> servicesList = null;
 			if (service != null) {
 				servicesList = new ArrayList<Service>();
 				servicesList.add(service);
