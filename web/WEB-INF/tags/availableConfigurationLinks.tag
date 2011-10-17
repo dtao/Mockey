@@ -10,7 +10,7 @@
 
 <%
 IMockeyStorage store = StorageRegistry.MockeyStorage;
-List<ServicePlan> servicePlans = store.getServicePlans();
+Collection<ServicePlan> servicePlans = store.getServicePlans();
 Service exampleService = null;
 for(Service s: store.getServices()) {
     if(s.getScenarios().size() > 0 ) {
