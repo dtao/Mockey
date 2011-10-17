@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.mockey.PersistableItemStore;
 import com.mockey.model.PersistableItem;
 
-public class OrderedMapTests {
+public class PersistableItemStoreTests {
 	
 	private class BasicPersistableItem implements PersistableItem {
 		private Long id;
