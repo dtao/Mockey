@@ -52,7 +52,7 @@ import com.mockey.model.PersistableItem;
 public class PersistableItemStore<T extends PersistableItem> {
 
     private static final long serialVersionUID = -1654150132938363942L;
-    private ConcurrentSkipListMap<Long, T> map; 
+    private ConcurrentSkipListMap<Long, T> map = new ConcurrentSkipListMap<Long, T>();
     private Integer maxSize = null;
     
     /**
