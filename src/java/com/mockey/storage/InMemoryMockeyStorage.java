@@ -36,7 +36,7 @@ import java.util.List;
 import org.apache.http.Header;
 import org.apache.log4j.Logger;
 
-import com.mockey.OrderedMap;
+import com.mockey.PersistableItemStore;
 import com.mockey.model.FulfilledClientRequest;
 import com.mockey.model.PersistableItem;
 import com.mockey.model.ProxyServerModel;
@@ -56,12 +56,12 @@ import com.mockey.storage.xml.MockeyXmlFileManager;
  */
 public class InMemoryMockeyStorage implements IMockeyStorage {
 
-	private OrderedMap<FulfilledClientRequest> historyStore = new OrderedMap<FulfilledClientRequest>();
-	private OrderedMap<Service> mockServiceStore = new OrderedMap<Service>();
-	private OrderedMap<ServiceRef> serviceRefStore = new OrderedMap<ServiceRef>();
-	private OrderedMap<ServicePlan> servicePlanStore = new OrderedMap<ServicePlan>();
+	private PersistableItemStore<FulfilledClientRequest> historyStore = new PersistableItemStore<FulfilledClientRequest>();
+	private PersistableItemStore<Service> mockServiceStore = new PersistableItemStore<Service>();
+	private PersistableItemStore<ServiceRef> serviceRefStore = new PersistableItemStore<ServiceRef>();
+	private PersistableItemStore<ServicePlan> servicePlanStore = new PersistableItemStore<ServicePlan>();
 
-	private OrderedMap<TwistInfo> twistInfoStore = new OrderedMap<TwistInfo>();
+	private PersistableItemStore<TwistInfo> twistInfoStore = new PersistableItemStore<TwistInfo>();
 
 	private static Logger logger = Logger.getLogger(InMemoryMockeyStorage.class);
 	private ProxyServerModel proxyInfoBean = new ProxyServerModel();
@@ -308,10 +308,10 @@ public class InMemoryMockeyStorage implements IMockeyStorage {
 	}
 
 	public void deleteEverything() {
-		historyStore = new OrderedMap<FulfilledClientRequest>();
-		mockServiceStore = new OrderedMap<Service>();
-		servicePlanStore = new OrderedMap<ServicePlan>();
-		twistInfoStore = new OrderedMap<TwistInfo>();
+		historyStore = new PersistableItemStore<FulfilledClientRequest>();
+		mockServiceStore = new PersistableItemStore<Service>();
+		servicePlanStore = new PersistableItemStore<ServicePlan>();
+		twistInfoStore = new PersistableItemStore<TwistInfo>();
 		this.univeralErrorServiceId = null;
 		this.univeralErrorScenarioId = null;
 		this.writeMemoryToFile();
@@ -382,7 +382,7 @@ public class InMemoryMockeyStorage implements IMockeyStorage {
 	}
 
 	public void deleteFulfilledClientRequests() {
-		historyStore = new OrderedMap<FulfilledClientRequest>();
+		historyStore = new PersistableItemStore<FulfilledClientRequest>();
 
 	}
 

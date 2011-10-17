@@ -40,20 +40,29 @@ import com.mockey.model.PersistableItem;
  * So:
  * <p>
  * <code>
- * OrderedMap<MyObj> myMap = new OrderedMap<MyObj>();<br>
- * 0 == myMap.save(new MyObj()).getId();<br>
- * 1 == myMap.save(new MyObj()).getId();<br>
- * 2 == myMap.save(new MyObj()).getId();<br>
+ * PersistableItemStore<MyObj> myStore = new PersistableItemStore<MyObj>();<br>
+ * 0 == myStore.save(new MyObj()).getId();<br>
+ * 1 == myStore.save(new MyObj()).getId();<br>
+ * 2 == myStore.save(new MyObj()).getId();<br>
  * </code>
  * 
  * @author chad.lafontaine
  * 
  */
-public class OrderedMap<T extends PersistableItem> extends ConcurrentSkipListMap<Long, T> implements Map<Long, T> {
+public class PersistableItemStore<T extends PersistableItem> {
 
     private static final long serialVersionUID = -1654150132938363942L;
+    private ConcurrentSkipListMap<Long, T> map; 
     private Integer maxSize = null;
-
+    
+    /**
+     * Size of the store.
+     * 
+     * @return Returns the current number of items in the store.
+     */
+    public int size() {
+    	return this.map.size();
+    }
     
     /**
      * Will save item. If maximum size of this Map is set (non-null, positive),
@@ -72,11 +81,11 @@ public class OrderedMap<T extends PersistableItem> extends ConcurrentSkipListMap
                 item.setId(nextNumber);
             }
             
-            this.put(item.getId(), item);
+            this.map.put(item.getId(), item);
         }
 
         if (this.maxSize != null && this.maxSize > 0) {
-            while (this.size() > this.maxSize) {
+            while (this.map.size() > this.maxSize) {
                 Long removeMe = getSmallestValue();
                 this.remove(removeMe);
             }
@@ -84,24 +93,28 @@ public class OrderedMap<T extends PersistableItem> extends ConcurrentSkipListMap
         
         return item;
     }
+    
+    public T remove(Long id) {
+    	return this.map.remove(id);
+    }
 
     public T get(Object key) {
       if (key == null) {
         return null;
       }
-      return super.get(key);
+      return this.map.get(key);
     }
 
     private Long getSmallestValue() {
-        return this.firstKey();
+        return this.map.firstKey();
     }
 
     private Long getNextValue() {
-        return this.isEmpty() ? 1L : new Long(this.lastKey() + 1L);
+        return this.map.isEmpty() ? 1L : new Long(this.map.lastKey() + 1L);
     }
 
 	public Collection<T> getOrderedList() {
-    	return this.values();
+    	return this.map.values();
     }
 
     /**

@@ -2,13 +2,13 @@ package com.mockey.storage;
 
 import java.util.Collection;
 
-import com.mockey.OrderedMap;
+import com.mockey.PersistableItemStore;
 import com.mockey.model.ApiDocService;
 import com.mockey.model.PersistableItem;
 
 public class IApiStorageInMemory implements IApiStorage {
 
-	private OrderedMap<ApiDocService> apiStore = new OrderedMap<ApiDocService>();
+	private PersistableItemStore<ApiDocService> apiStore = new PersistableItemStore<ApiDocService>();
 	private static IApiStorageInMemory store = new IApiStorageInMemory();
 
 	/**

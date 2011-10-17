@@ -40,7 +40,7 @@ import org.json.JSONObject;
 
 import com.mockey.ClientExecuteProxy;
 import com.mockey.ClientExecuteProxyException;
-import com.mockey.OrderedMap;
+import com.mockey.PersistableItemStore;
 import com.mockey.storage.IMockeyStorage;
 import com.mockey.storage.StorageRegistry;
 import com.mockey.ui.Util;
@@ -66,7 +66,7 @@ public class Service implements PersistableItem, ExecutableService {
 	private Long errorScenarioId;
 	private String httpContentType = "text/html;charset=utf-8";
 	private int hangTime = 0;
-	private OrderedMap<Scenario> scenarios = new OrderedMap<Scenario>();
+	private PersistableItemStore<Scenario> scenarios = new PersistableItemStore<Scenario>();
 	private int serviceResponseType = SERVICE_RESPONSE_TYPE_PROXY;
 	private String httpMethod = "GET";
 	private String url = "";

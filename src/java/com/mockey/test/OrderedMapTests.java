@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.mockey.OrderedMap;
+import com.mockey.PersistableItemStore;
 import com.mockey.model.PersistableItem;
 
 public class OrderedMapTests {
@@ -31,11 +31,11 @@ public class OrderedMapTests {
 		}
 	}
 	
-	private OrderedMap<BasicPersistableItem> items;
+	private PersistableItemStore<BasicPersistableItem> items;
 	
 	@Before
 	public void beforeTest() {
-		this.items = new OrderedMap<BasicPersistableItem>();
+		this.items = new PersistableItemStore<BasicPersistableItem>();
 	}
 	
 	private void saveItems(int numberOfItems) {
