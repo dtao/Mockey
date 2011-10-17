@@ -2,4 +2,7 @@
 .DS_Store
 .classpath
 .project
+.idea/*
 bin/*
+build/*
+dist/*
