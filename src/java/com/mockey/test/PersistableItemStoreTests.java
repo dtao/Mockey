@@ -37,10 +37,10 @@ public class PersistableItemStoreTests {
 	public void beforeTest() {
 		this.items = new PersistableItemStore<BasicPersistableItem>();
 	}
-	
-	private void saveItems(int numberOfItems) {
-		for (int i = 1; i <= numberOfItems; ++i) {
-			this.items.save(new BasicPersistableItem((long)i));
+
+	private void saveItems(Long...ids) {
+		for (int i = 0; i < ids.length; ++i) {
+			this.items.save(new BasicPersistableItem((long)ids[i]));
 		}
 	}
 	
@@ -76,13 +76,13 @@ public class PersistableItemStoreTests {
 	@Test
 	public void limitsInternalStoreToSpecifiedMaxSize() {
 		this.items.setMaxSize(2);
-		saveItems(3);
+		saveItems(1L, 2L, 3L);
 		assertEquals(2, this.items.size());
 	}
 	
 	@Test
 	public void assignsItemNewMaxIdWhenIdMissing() {
-		saveItems(3);
+		saveItems(1L, 2L, 3L);
 		BasicPersistableItem item = new BasicPersistableItem(null);
 		assertEquals(4L, this.items.save(item).getId());
 	}
@@ -90,13 +90,13 @@ public class PersistableItemStoreTests {
 	@Test
 	public void dropsItemWithLowestIdWhenExceedingMaxSize() {
 		this.items.setMaxSize(2);
-		saveItems(3);
+		saveItems(1L, 2L, 3L);
 		verifyIds(2L, 3L);
 	}
 	
 	@Test
 	public void providesListOfItemsOrderedById() {
-		saveItems(3);
+		saveItems(1L, 2L, 3L);
 		verifyIds(1L, 2L, 3L);
 	}
 }
