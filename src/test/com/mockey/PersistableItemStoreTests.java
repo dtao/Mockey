@@ -1,4 +1,4 @@
-package com.mockey.test;
+package com.mockey;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
