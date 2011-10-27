@@ -198,10 +198,8 @@ public class ServiceConfigurationServlet extends HttpServlet {
 		}
 	}
 
-	/**
-	 * 
-	 */
-	public void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	@Override
+	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		String serviceId = req.getParameter(ServiceConfigurationAPI.API_SERVICE_ID);
 		String serviceName = req.getParameter(ServiceConfigurationAPI.API_SERVICE_NAME);

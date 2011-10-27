@@ -68,7 +68,8 @@ public class ResponseServlet extends HttpServlet {
 	 * type.
 	 */
 	@SuppressWarnings("static-access")
-	public void service(HttpServletRequest originalHttpReqFromClient, HttpServletResponse resp)
+    @Override
+	public void doPost(HttpServletRequest originalHttpReqFromClient, HttpServletResponse resp)
 			throws ServletException, IOException {
 
 		RequestFromClient request = new RequestFromClient(originalHttpReqFromClient);
