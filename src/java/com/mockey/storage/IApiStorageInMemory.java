@@ -20,25 +20,21 @@ public class IApiStorageInMemory implements IApiStorage {
 	}
 
 
-	@Override
 	public ApiDocService getApiDocServiceById(Long serviceId) {
 		return apiStore.get(serviceId);
 	}
 
-	@Override
 	public Collection<ApiDocService> getApiDocServices() {
 		return this.apiStore.getOrderedList();
 
 	}
 
-	@Override
 	public ApiDocService saveOrUpdateService(ApiDocService apiDocService) {
 		PersistableItem item = apiStore.save(apiDocService);
 		return (ApiDocService) item;
 	}
 
 
-	@Override
 	public ApiDocService getApiDocServiceByName(String name) {
 		ApiDocService service = null;
 		for(ApiDocService s : getApiDocServices()){
