@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.mockey.storage.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -52,10 +53,6 @@ import com.mockey.model.ApiDocService;
 import com.mockey.model.PlanItem;
 import com.mockey.model.Service;
 import com.mockey.model.ServicePlan;
-import com.mockey.storage.IApiStorage;
-import com.mockey.storage.IApiStorageInMemory;
-import com.mockey.storage.IMockeyStorage;
-import com.mockey.storage.StorageRegistry;
 
 /**
  * Management of SAVE, DELETE, or SET for a Service Plan, in addition to HTTP
@@ -205,151 +202,153 @@ public class ServicePlanSetupServlet extends HttpServlet implements ServicePlanC
 	 * @throws IOException
 	 *             basic
 	 */
+    @Override
 	public void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        synchronized (InMemoryMockeyStorage.getLockObject()) {
+            try {
+                // API BUSINESS LOGIC
+                // log.debug("Service Plan setup/delete");
+                ServicePlan servicePlan = null;
+                Long servicePlanId = null;
+                Collection<Service> allServices = store.getServices();
+                // *********************
+                // BEST EFFORT HERE.
+                // We try to find the service by ID.
+                // If not found, we try by NAME.
+                // Otherwise, let the rest of the logic do its thing.
+                // *********************
 
-		try {
-			// API BUSINESS LOGIC
-			// log.debug("Service Plan setup/delete");
-			ServicePlan servicePlan = null;
-			Long servicePlanId = null;
-			Collection<Service> allServices = store.getServices();
-			// *********************
-			// BEST EFFORT HERE.
-			// We try to find the service by ID.
-			// If not found, we try by NAME.
-			// Otherwise, let the rest of the logic do its thing.
-			// *********************
+                try {
+                    servicePlanId = new Long(req.getParameter(API_SETPLAN_PARAMETER_PLAN_ID));
+                    servicePlan = store.getServicePlanById(servicePlanId);
+                } catch (Exception e) {
+                    if (req.getParameter(API_SETPLAN_PARAMETER_PLAN_ID) != null) {
+                        log.debug("No service plan with ID '" + req.getParameter(API_SETPLAN_PARAMETER_PLAN_ID)
+                                + "' found.", e);
+                    }
+                }
+                if (servicePlan == null) {
+                    try {
+                        String servicePlanName = req.getParameter(API_SET_SAVE_OR_UPDATE_PARAMETER_PLAN_NAME);
+                        servicePlan = store.getServicePlanByName(servicePlanName.trim());
+                    } catch (Exception e) {
+                        if (req.getParameter(API_SET_SAVE_OR_UPDATE_PARAMETER_PLAN_NAME) != null) {
+                            log.debug("No service plan with NAME '"
+                                    + req.getParameter(API_SET_SAVE_OR_UPDATE_PARAMETER_PLAN_NAME) + "' found.", e);
+                        }
+                    }
+                }
 
-			try {
-				servicePlanId = new Long(req.getParameter(API_SETPLAN_PARAMETER_PLAN_ID));
-				servicePlan = store.getServicePlanById(servicePlanId);
-			} catch (Exception e) {
-				if (req.getParameter(API_SETPLAN_PARAMETER_PLAN_ID) != null) {
-					log.debug("No service plan with ID '" + req.getParameter(API_SETPLAN_PARAMETER_PLAN_ID)
-							+ "' found.", e);
-				}
-			}
-			if (servicePlan == null) {
-				try {
-					String servicePlanName = req.getParameter(API_SET_SAVE_OR_UPDATE_PARAMETER_PLAN_NAME);
-					servicePlan = store.getServicePlanByName(servicePlanName.trim());
-				} catch (Exception e) {
-					if (req.getParameter(API_SET_SAVE_OR_UPDATE_PARAMETER_PLAN_NAME) != null) {
-						log.debug("No service plan with NAME '"
-								+ req.getParameter(API_SET_SAVE_OR_UPDATE_PARAMETER_PLAN_NAME) + "' found.", e);
-					}
-				}
-			}
+                JSONObject jsonResultObject = new JSONObject();
 
-			JSONObject jsonResultObject = new JSONObject();
+                String action = req.getParameter(API_SETPLAN_PARAMETER_ACTION);
+                String transientState = req.getParameter(API_TRANSIENT_STATE);
+                try {
+                    if (transientState != null) {
+                        servicePlan.setTransientState(new Boolean(transientState));
+                    }
+                } catch (Exception e) {
+                    log.debug("ServicePlan not set to transient state but a value was given as: " + transientState);
 
-			String action = req.getParameter(API_SETPLAN_PARAMETER_ACTION);
-			String transientState = req.getParameter(API_TRANSIENT_STATE);
-			try {
-				if (transientState != null) {
-					servicePlan.setTransientState(new Boolean(transientState));
-				}
-			} catch (Exception e) {
-				log.debug("ServicePlan not set to transient state but a value was given as: " + transientState);
+                }
+                if (API_SETPLAN_PARAMETER_ACTION_VALUE_DELETE_PLAN.equals(action)) {
+                    JSONObject jsonObject = new JSONObject();
 
-			}
-			if (API_SETPLAN_PARAMETER_ACTION_VALUE_DELETE_PLAN.equals(action)) {
-				JSONObject jsonObject = new JSONObject();
+                    try {
+                        store.deleteServicePlan(servicePlan);
+                        jsonObject.put("success", "Service plan '" + servicePlan.getName() + "' deleted");
+                        jsonObject.put("planId", "" + servicePlan.getId());
+                        jsonObject.put("planName", "" + servicePlan.getName());
+                    } catch (Exception e) {
 
-				try {
-					store.deleteServicePlan(servicePlan);
-					jsonObject.put("success", "Service plan '" + servicePlan.getName() + "' deleted");
-					jsonObject.put("planId", "" + servicePlan.getId());
-					jsonObject.put("planName", "" + servicePlan.getName());
-				} catch (Exception e) {
+                        jsonObject.put("fail", "Service plan not deleted. Please check your logs for insight.");
 
-					jsonObject.put("fail", "Service plan not deleted. Please check your logs for insight.");
+                    }
+                    resp.setContentType("application/json");
+                    PrintWriter out = resp.getWriter();
+                    jsonResultObject.put("result", jsonObject);
+                    out.println(jsonResultObject.toString());
+                    out.flush();
+                    out.close();
+                    return;
+                } else if (API_SETPLAN_PARAMETER_ACTION_VALUE_SET_PLAN.equals(action) && servicePlan != null) {
+                    JSONObject jsonObject = new JSONObject();
 
-				}
-				resp.setContentType("application/json");
-				PrintWriter out = resp.getWriter();
-				jsonResultObject.put("result", jsonObject);
-				out.println(jsonResultObject.toString());
-				out.flush();
-				out.close();
-				return;
-			} else if (API_SETPLAN_PARAMETER_ACTION_VALUE_SET_PLAN.equals(action) && servicePlan != null) {
-				JSONObject jsonObject = new JSONObject();
+                    try {
+                        setPlan(servicePlan);
+                        String msg = "Service plan " + servicePlan.getName() + " set";
+                        jsonObject.put("success", msg);
+                        jsonObject.put("planid", "" + servicePlan.getId());
+                        jsonObject.put("planName", "" + servicePlan.getName());
 
-				try {
-					setPlan(servicePlan);
-					String msg = "Service plan " + servicePlan.getName() + " set";
-					jsonObject.put("success", msg);
-					jsonObject.put("planid", "" + servicePlan.getId());
-					jsonObject.put("planName", "" + servicePlan.getName());
+                        Util.saveSuccessMessage(msg, req); // For redirect
+                    } catch (Exception e) {
+                        jsonObject.put("fail", "Service plan not set. Please check your logs for insight.");
+                    }
+                    resp.setContentType("application/json");
+                    PrintWriter out = resp.getWriter();
+                    jsonResultObject.put("result", jsonObject);
+                    out.println(jsonResultObject.toString());
+                    out.flush();
+                    out.close();
+                    return;
+                } else if (API_SETPLAN_PARAMETER_ACTION_VALUE_SAVE_PLAN.equals(action)) {
 
-					Util.saveSuccessMessage(msg, req); // For redirect
-				} catch (Exception e) {
-					jsonObject.put("fail", "Service plan not set. Please check your logs for insight.");
-				}
-				resp.setContentType("application/json");
-				PrintWriter out = resp.getWriter();
-				jsonResultObject.put("result", jsonObject);
-				out.println(jsonResultObject.toString());
-				out.flush();
-				out.close();
-				return;
-			} else if (API_SETPLAN_PARAMETER_ACTION_VALUE_SAVE_PLAN.equals(action)) {
+                    if (servicePlan == null) {
+                        servicePlan = new ServicePlan();
+                    }
+                    // ***************************
+                    // LET'S PREVENT EMPTY PLAN NAMES
+                    // ***************************
 
-				if (servicePlan == null) {
-					servicePlan = new ServicePlan();
-				}
-				// ***************************
-				// LET'S PREVENT EMPTY PLAN NAMES
-				// ***************************
+                    String servicePlanName = req.getParameter(API_SET_SAVE_OR_UPDATE_PARAMETER_PLAN_NAME);
+                    if (servicePlanName == null) {
+                        // If possible, carry over the name from an existing Plan.
+                        servicePlanName = servicePlan.getName();
+                    }
+                    // If all fails, inject a name.
+                    if (servicePlanName == null || servicePlanName.trim().length() == 0) {
+                        servicePlanName = "Plan (auto-generated-name)";
+                    }
+                    servicePlan.setName(servicePlanName.trim());
 
-				String servicePlanName = req.getParameter(API_SET_SAVE_OR_UPDATE_PARAMETER_PLAN_NAME);
-				if (servicePlanName == null) {
-					// If possible, carry over the name from an existing Plan.
-					servicePlanName = servicePlan.getName();
-				}
-				// If all fails, inject a name.
-				if (servicePlanName == null || servicePlanName.trim().length() == 0) {
-					servicePlanName = "Plan (auto-generated-name)";
-				}
-				servicePlan.setName(servicePlanName.trim());
+                    // ***************************
+                    // SAVE/UPDATE THE PLAN
+                    // ***************************
+                    ServicePlan savedServicePlan = createOrUpdatePlan(servicePlan);
 
-				// ***************************
-				// SAVE/UPDATE THE PLAN
-				// ***************************
-				ServicePlan savedServicePlan = createOrUpdatePlan(servicePlan);
+                    // ***************************
+                    // SAVE/UPDATE THE PLAN
+                    // ***************************
+                    resp.setContentType("application/json");
+                    PrintWriter out = resp.getWriter();
+                    String msg = "Service plan " + servicePlan.getName() + " saved";
 
-				// ***************************
-				// SAVE/UPDATE THE PLAN
-				// ***************************
-				resp.setContentType("application/json");
-				PrintWriter out = resp.getWriter();
-				String msg = "Service plan " + servicePlan.getName() + " saved";
+                    // HACK: For redirect IF JavaScript decides to (if type is not
+                    // JSON)
+                    if (!"json".equalsIgnoreCase(req.getParameter(API_SETPLAN_PARAMETER_TYPE))) {
+                        Util.saveSuccessMessage(msg, req);
+                    }
+                    // JSON response
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("success", msg);
+                    jsonObject.put("planid", "" + savedServicePlan.getId());
+                    jsonObject.put("planName", "" + savedServicePlan.getName());
+                    jsonResultObject.put("result", jsonObject);
+                    out.println(jsonResultObject.toString());
+                    out.flush();
+                    out.close();
+                    return;
+                }
 
-				// HACK: For redirect IF JavaScript decides to (if type is not
-				// JSON)
-				if (!"json".equalsIgnoreCase(req.getParameter(API_SETPLAN_PARAMETER_TYPE))) {
-					Util.saveSuccessMessage(msg, req);
-				}
-				// JSON response
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("success", msg);
-				jsonObject.put("planid", "" + savedServicePlan.getId());
-				jsonObject.put("planName", "" + savedServicePlan.getName());
-				jsonResultObject.put("result", jsonObject);
-				out.println(jsonResultObject.toString());
-				out.flush();
-				out.close();
-				return;
-			}
-
-			req.setAttribute("services", allServices);
-			req.setAttribute("plans", store.getServicePlans());
-			RequestDispatcher dispatch = req.getRequestDispatcher("/home.jsp");
-			dispatch.forward(req, resp);
-		} catch (JSONException jsonException) {
-			throw new ServletException(jsonException);
-		}
+                req.setAttribute("services", allServices);
+                req.setAttribute("plans", store.getServicePlans());
+                RequestDispatcher dispatch = req.getRequestDispatcher("/home.jsp");
+                dispatch.forward(req, resp);
+            } catch (JSONException jsonException) {
+                throw new ServletException(jsonException);
+            }
+        }
 	}
 
 	private ServicePlan createOrUpdatePlan(ServicePlan servicePlan) {

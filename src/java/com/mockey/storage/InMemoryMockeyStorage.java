@@ -73,14 +73,20 @@ public class InMemoryMockeyStorage implements IMockeyStorage {
 	// Yes, by default, we need this as TRUE.
 	private Boolean transientState = new Boolean(true);
 
+    // Concurrent calls to different servlets cause bugs. Therefore we will synchronize them.
+    private static Object lockObject = new Object();
+
 	/**
 	 * 
 	 * @return
 	 */
 	static InMemoryMockeyStorage getInstance() {
-		
 		return store;
 	}
+
+    public static Object getLockObject() {
+        return lockObject;
+    }
 	
 	/**
 	 * 

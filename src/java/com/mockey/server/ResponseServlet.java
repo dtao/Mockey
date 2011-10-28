@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.mockey.storage.InMemoryMockeyStorage;
 import org.apache.http.protocol.HTTP;
 import org.apache.log4j.Logger;
 
@@ -69,57 +70,59 @@ public class ResponseServlet extends HttpServlet {
 	 */
 	@SuppressWarnings("static-access")
     @Override
-	public void doPost(HttpServletRequest originalHttpReqFromClient, HttpServletResponse resp)
+	public void service(HttpServletRequest originalHttpReqFromClient, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		RequestFromClient request = new RequestFromClient(originalHttpReqFromClient);
+        synchronized (InMemoryMockeyStorage.getLockObject()) {
+            RequestFromClient request = new RequestFromClient(originalHttpReqFromClient);
 
-		logger.info(request.getHeaderInfo());
-		logger.info(request.getParameterInfo());
-		logger.info(request.getCookieInfoAsString());
+            logger.info(request.getHeaderInfo());
+            logger.info(request.getParameterInfo());
+            logger.info(request.getCookieInfoAsString());
 
-		String originalHttpReqURI = originalHttpReqFromClient.getRequestURI();
+            String originalHttpReqURI = originalHttpReqFromClient.getRequestURI();
 
-		String contextRoot = originalHttpReqFromClient.getContextPath();
-		if (originalHttpReqURI.startsWith(contextRoot)) {
-			originalHttpReqURI = originalHttpReqURI.substring(contextRoot.length(), originalHttpReqURI.length());
-		}
+            String contextRoot = originalHttpReqFromClient.getContextPath();
+            if (originalHttpReqURI.startsWith(contextRoot)) {
+                originalHttpReqURI = originalHttpReqURI.substring(contextRoot.length(), originalHttpReqURI.length());
+            }
 
-		Url serviceUrl = new Url(originalHttpReqURI);
-		Service service = store.getServiceByUrl(serviceUrl.getFullUrl());
-		Url urlToExecute = service.getDefaultRealUrl();
+            Url serviceUrl = new Url(originalHttpReqURI);
+            Service service = store.getServiceByUrl(serviceUrl.getFullUrl());
+            Url urlToExecute = service.getDefaultRealUrl();
 
-		service.setHttpMethod(originalHttpReqFromClient.getMethod());
+            service.setHttpMethod(originalHttpReqFromClient.getMethod());
 
-		ResponseFromService response = service.execute(request, urlToExecute);
-		logRequestAsFulfilled(service, request, response, originalHttpReqFromClient.getRemoteAddr());
+            ResponseFromService response = service.execute(request, urlToExecute);
+            logRequestAsFulfilled(service, request, response, originalHttpReqFromClient.getRemoteAddr());
 
-		try {
-			// Wait for a X hang time seconds.
-			logger.debug("Waiting..." + service.getHangTime() + " miliseconds ");
-			Thread.currentThread().sleep(service.getHangTime());
-			logger.debug("Done Waiting");
-		} catch (Exception e) {
-			// Catch interrupt exception.
-			// Or not.
-		}
+            try {
+                // Wait for a X hang time seconds.
+                logger.debug("Waiting..." + service.getHangTime() + " miliseconds ");
+                Thread.currentThread().sleep(service.getHangTime());
+                logger.debug("Done Waiting");
+            } catch (Exception e) {
+                // Catch interrupt exception.
+                // Or not.
+            }
 
-		// TODO:
-		// return all headers and cookies to allow setup of
-		// services and/or scenarios copied/created from History.
-	    final String charSet=getServiceCharSet(service);
+            // TODO:
+            // return all headers and cookies to allow setup of
+            // services and/or scenarios copied/created from History.
+            final String charSet=getServiceCharSet(service);
 
-	    resp.setCharacterEncoding(charSet); // "UTF-8");
-	    resp.setContentType(service.getHttpContentType());
-	    if (!(service.getServiceResponseType() == Service.SERVICE_RESPONSE_TYPE_PROXY)) {
-	        resp.setContentType(service.getHttpContentType());
-	        byte[] myCharSetBytes = response.getBody().getBytes(charSet);
-	        new PrintStream(resp.getOutputStream()).write(myCharSetBytes);
-	        resp.getOutputStream().flush();
-	    } else {
-	        resp.setStatus(response.getStatusLine().getStatusCode());
-	        response.writeToOutput(resp);
-	    }
+            resp.setCharacterEncoding(charSet); // "UTF-8");
+            resp.setContentType(service.getHttpContentType());
+            if (!(service.getServiceResponseType() == Service.SERVICE_RESPONSE_TYPE_PROXY)) {
+                resp.setContentType(service.getHttpContentType());
+                byte[] myCharSetBytes = response.getBody().getBytes(charSet);
+                new PrintStream(resp.getOutputStream()).write(myCharSetBytes);
+                resp.getOutputStream().flush();
+            } else {
+                resp.setStatus(response.getStatusLine().getStatusCode());
+                response.writeToOutput(resp);
+            }
+        }
 	}
 	
 	/**

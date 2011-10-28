@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.mockey.storage.*;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
@@ -41,10 +42,6 @@ import com.mockey.model.ApiDocRequest;
 import com.mockey.model.ApiDocResponse;
 import com.mockey.model.ApiDocService;
 import com.mockey.model.Service;
-import com.mockey.storage.IApiStorage;
-import com.mockey.storage.IApiStorageInMemory;
-import com.mockey.storage.IMockeyStorage;
-import com.mockey.storage.StorageRegistry;
 
 /**
  * Management of Service configuration, in addition to HTTP Documentation.
@@ -199,128 +196,132 @@ public class ServiceConfigurationServlet extends HttpServlet {
 	}
 
 	@Override
-	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	public void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        synchronized (InMemoryMockeyStorage.getLockObject()) {
+            String serviceId = req.getParameter(ServiceConfigurationAPI.API_SERVICE_ID);
+            String serviceName = req.getParameter(ServiceConfigurationAPI.API_SERVICE_NAME);
+            String hangTime = req.getParameter(ServiceConfigurationAPI.API_SERVICE_HANGTIME);
+            String scenarioId = req.getParameter(ServiceConfigurationAPI.API_SERVICE_SCENARIO_ID);
+            String scenarioName = req.getParameter(ServiceConfigurationAPI.API_SERVICE_SCENARIO_NAME);
+            String httpContentType = req.getParameter(ServiceConfigurationAPI.API_SERVICE_CONTENT_TYPE);
+            String serviceResponseType = req.getParameter(ServiceConfigurationAPI.API_SERVICE_RESPONSE_TYPE);
+            String defaultUrlIndex = req.getParameter("defaultUrlIndex");
+            String transientState = req.getParameter(ServiceConfigurationAPI.API_TRANSIENT_STATE);
 
-		String serviceId = req.getParameter(ServiceConfigurationAPI.API_SERVICE_ID);
-		String serviceName = req.getParameter(ServiceConfigurationAPI.API_SERVICE_NAME);
-		String hangTime = req.getParameter(ServiceConfigurationAPI.API_SERVICE_HANGTIME);
-		String scenarioId = req.getParameter(ServiceConfigurationAPI.API_SERVICE_SCENARIO_ID);
-		String scenarioName = req.getParameter(ServiceConfigurationAPI.API_SERVICE_SCENARIO_NAME);
-		String httpContentType = req.getParameter(ServiceConfigurationAPI.API_SERVICE_CONTENT_TYPE);
-		String serviceResponseType = req.getParameter(ServiceConfigurationAPI.API_SERVICE_RESPONSE_TYPE);
-		String defaultUrlIndex = req.getParameter("defaultUrlIndex");
-		String transientState = req.getParameter(ServiceConfigurationAPI.API_TRANSIENT_STATE);
+            Service service = null;
+            JSONObject jsonResultObject = new JSONObject();
 
-		Service service = null;
-		JSONObject jsonResultObject = new JSONObject();
+            if (serviceId != null) {
+                service = store.getServiceById(new Long(serviceId));
+            } else {
+                service = store.getServiceByName(serviceName);
+            }
 
-		if (serviceId != null) {
-			service = store.getServiceById(new Long(serviceId));
-		} else {
-			service = store.getServiceByName(serviceName);
-		}
+            log.debug("Updating service " + serviceName + ", current response type: " + serviceResponseType);
 
-		try {
-			service.setServiceResponseTypeByString(serviceResponseType);
+            try {
+                service.setServiceResponseTypeByString(serviceResponseType);
+                log.debug("Set response type to " + serviceResponseType);
+            } catch (Exception e) {
+                log.debug("Updating service without a 'service response type' value");
+            }
 
-		} catch (Exception e) {
-			log.debug("Updating service without a 'service response type' value");
-		}
+            try {
+                int index = Integer.parseInt(defaultUrlIndex);
 
-		try {
-			int index = Integer.parseInt(defaultUrlIndex);
+                service.setDefaultRealUrlIndex(index - 1);
+            } catch (Exception e) {
 
-			service.setDefaultRealUrlIndex(index - 1);
-		} catch (Exception e) {
+            }
 
-		}
+            try {
+                if (hangTime != null) {
+                    service.setHangTime((new Integer(hangTime).intValue()));
+                }
+            } catch (Exception e) {
+                log.debug("Updating service without a 'hang time' value");
+            }
 
-		try {
-			if (hangTime != null) {
-				service.setHangTime((new Integer(hangTime).intValue()));
-			}
-		} catch (Exception e) {
-			log.debug("Updating service without a 'hang time' value");
-		}
+            try {
+                if (transientState != null) {
+                    service.setTransientState((new Boolean(transientState)));
+                }
+            } catch (Exception e) {
+                log.debug("Updating service without a 'transient state' value");
+            }
 
-		try {
-			if (transientState != null) {
-				service.setTransientState((new Boolean(transientState)));
-			}
-		} catch (Exception e) {
-			log.debug("Updating service without a 'transient state' value");
-		}
+            try {
+                if (httpContentType != null) {
+                    service.setHttpContentType(httpContentType);
+                }
+            } catch (Exception e) {
+                log.debug("Updating service without a 'hang time' value");
+            }
+            try {
+                if (scenarioId != null) {
+                    service.setDefaultScenarioId(new Long(scenarioId));
+                } else {
+                    service.setDefaultScenarioByName(scenarioName);
+                }
+            } catch (Exception e) {
+                // Do nothing.
+                log.debug("Updating service without a 'default scenario ID' value");
+            }
 
-		try {
-			if (httpContentType != null) {
-				service.setHttpContentType(httpContentType);
-			}
-		} catch (Exception e) {
-			log.debug("Updating service without a 'hang time' value");
-		}
-		try {
-			if (scenarioId != null) {
-				service.setDefaultScenarioId(new Long(scenarioId));
-			} else {
-				service.setDefaultScenarioByName(scenarioName);
-			}
-		} catch (Exception e) {
-			// Do nothing.
-			log.debug("Updating service without a 'default scenario ID' value");
-		}
-		service = store.saveOrUpdateService(service);
+            service = store.saveOrUpdateService(service);
+            log.debug("Saved service! Now response type is " + service.getServiceResponseType());
 
-		resp.setContentType("application/json");
-		PrintWriter out = resp.getWriter();
+            resp.setContentType("application/json");
+            PrintWriter out = resp.getWriter();
 
-		JSONObject jsonResponseObject = new JSONObject();
-		try {
+            JSONObject jsonResponseObject = new JSONObject();
+            try {
 
-			if (service != null) {
+                if (service != null) {
 
-				jsonResultObject.put("success", "updated");
-				jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_NAME, service.getServiceName());
-				jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_ID, service.getId());
-				jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_SCENARIO_ID, service.getDefaultScenarioId());
-				jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_SCENARIO_NAME, service
-						.getDefaultScenarioName());
-				jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_RESPONSE_TYPE, service
-						.getServiceResponseTypeAsString());
-				jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_HANGTIME, service.getHangTime());
-				jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_CONTENT_TYPE, service.getHttpContentType());
-				jsonResponseObject.put("result", jsonResultObject);
-			} else {
-				
-				StringBuffer outputInfo = new StringBuffer();
-				outputInfo.append(ServiceConfigurationAPI.API_SERVICE_ID + ":" + serviceId + " ");
-				outputInfo.append(ServiceConfigurationAPI.API_SERVICE_NAME + ":" + serviceName + " ");
-				outputInfo.append(ServiceConfigurationAPI.API_SERVICE_HANGTIME + ":" + hangTime + " ");
-				outputInfo.append(ServiceConfigurationAPI.API_SERVICE_SCENARIO_ID + ":" + scenarioId + " ");
-				outputInfo.append(ServiceConfigurationAPI.API_SERVICE_SCENARIO_NAME + ":" + scenarioName + " ");
-				outputInfo.append(ServiceConfigurationAPI.API_SERVICE_CONTENT_TYPE + ":" + httpContentType + " ");
-				outputInfo.append(ServiceConfigurationAPI.API_SERVICE_RESPONSE_TYPE + ":" + serviceResponseType + " ");
-				outputInfo.append("defaultUrlIndex" + ":" + defaultUrlIndex + " ");
-				outputInfo.append(ServiceConfigurationAPI.API_TRANSIENT_STATE + ":" + transientState + " ");
-	
-				jsonResultObject.put("fail", "Unable to update service configuration. ");
-				jsonResultObject.put("info", outputInfo.toString());
+                    jsonResultObject.put("success", "updated");
+                    jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_NAME, service.getServiceName());
+                    jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_ID, service.getId());
+                    jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_SCENARIO_ID, service.getDefaultScenarioId());
+                    jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_SCENARIO_NAME, service
+                            .getDefaultScenarioName());
+                    jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_RESPONSE_TYPE, service
+                            .getServiceResponseTypeAsString());
+                    jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_HANGTIME, service.getHangTime());
+                    jsonResultObject.put(ServiceConfigurationAPI.API_SERVICE_CONTENT_TYPE, service.getHttpContentType());
+                    jsonResponseObject.put("result", jsonResultObject);
+                } else {
 
-			}
-			out.println(jsonResponseObject.toString());
-		} catch (Exception e) {
-			log.error("Unable to build a JSON response. ", e);
-			try {
-				jsonResultObject.put("fail", "Unable to configure service.");
-				jsonResponseObject.put("result", jsonResultObject);
-				out.println(jsonResponseObject.toString());
-			} catch (Exception ee) {
-				log.error("Unable to again build an informative error JSON message response.", e);
-			}
+                    StringBuffer outputInfo = new StringBuffer();
+                    outputInfo.append(ServiceConfigurationAPI.API_SERVICE_ID + ":" + serviceId + " ");
+                    outputInfo.append(ServiceConfigurationAPI.API_SERVICE_NAME + ":" + serviceName + " ");
+                    outputInfo.append(ServiceConfigurationAPI.API_SERVICE_HANGTIME + ":" + hangTime + " ");
+                    outputInfo.append(ServiceConfigurationAPI.API_SERVICE_SCENARIO_ID + ":" + scenarioId + " ");
+                    outputInfo.append(ServiceConfigurationAPI.API_SERVICE_SCENARIO_NAME + ":" + scenarioName + " ");
+                    outputInfo.append(ServiceConfigurationAPI.API_SERVICE_CONTENT_TYPE + ":" + httpContentType + " ");
+                    outputInfo.append(ServiceConfigurationAPI.API_SERVICE_RESPONSE_TYPE + ":" + serviceResponseType + " ");
+                    outputInfo.append("defaultUrlIndex" + ":" + defaultUrlIndex + " ");
+                    outputInfo.append(ServiceConfigurationAPI.API_TRANSIENT_STATE + ":" + transientState + " ");
 
-		}
-		out.flush();
-		out.close();
+                    jsonResultObject.put("fail", "Unable to update service configuration. ");
+                    jsonResultObject.put("info", outputInfo.toString());
 
+                }
+                out.println(jsonResponseObject.toString());
+            } catch (Exception e) {
+                log.error("Unable to build a JSON response. ", e);
+                try {
+                    jsonResultObject.put("fail", "Unable to configure service.");
+                    jsonResponseObject.put("result", jsonResultObject);
+                    out.println(jsonResponseObject.toString());
+                } catch (Exception ee) {
+                    log.error("Unable to again build an informative error JSON message response.", e);
+                }
+
+            }
+            out.flush();
+            out.close();
+        }
 	}
 
 }
