@@ -28,7 +28,7 @@
 package com.mockey;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import com.mockey.model.PersistableItem;
@@ -77,7 +77,7 @@ public class PersistableItemStore<T extends PersistableItem> {
 
         if (item != null) {
             if (item.getId() == null) {
-                Long nextNumber = this.getNextValue();
+                Long nextNumber = this.getNextId();
                 item.setId(nextNumber);
             }
             
@@ -86,7 +86,7 @@ public class PersistableItemStore<T extends PersistableItem> {
 
         if (this.maxSize != null && this.maxSize > 0) {
             while (this.map.size() > this.maxSize) {
-                Long removeMe = getSmallestValue();
+                Long removeMe = getSmallestId();
                 this.remove(removeMe);
             }
         }
@@ -105,12 +105,28 @@ public class PersistableItemStore<T extends PersistableItem> {
       return this.map.get(key);
     }
 
-    private Long getSmallestValue() {
-        return this.map.firstKey();
+    private Long getSmallestId() {
+        try {
+            if (!this.map.isEmpty()) {
+                return this.map.firstKey();
+            } else {
+                return 0L;
+            }
+        } catch (NoSuchElementException e) {
+            return 0L;
+        }
     }
 
-    private Long getNextValue() {
-        return this.map.isEmpty() ? 1L : new Long(this.map.lastKey() + 1L);
+    private Long getNextId() {
+        try {
+            if (!this.map.isEmpty()) {
+                return new Long(this.map.lastKey() + 1L);
+            } else {
+                return 1L;
+            }
+        } catch (NoSuchElementException e) {
+            return 1L;
+        }
     }
 
 	public Collection<T> getOrderedList() {
